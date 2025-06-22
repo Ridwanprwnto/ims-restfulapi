@@ -1,0 +1,25 @@
+{
+  "name": "ims-api",
+  "module": "src/app.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/app.js",
+    "dev:hot": "bun --hot src/app.js",
+    "start": "bun src/app.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hono/node-server": "latest",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "latest",
+    "hono": "latest",
+    "mariadb": "latest",
+    "winston": "latest"
+  }
+}

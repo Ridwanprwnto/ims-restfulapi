@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMS API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6b21a8 0%, #3b82f6 100%);
+        }
+        .endpoint-method {
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        .method-get {
+            background-color: #38a169;
+            color: white;
+        }
+        .method-post {
+            background-color: #3182ce;
+            color: white;
+        }
+        .method-put {
+            background-color: #dd6b20;
+            color: white;
+        }
+        .method-delete {
+            background-color: #e53e3e;
+            color: white;
+        }
+        .blinking-cursor {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+    <script>
+        async function fetchServerInfo() {
+            const response = await fetch('/api/info');
+            const data = await response.json();
+            document.getElementById('domainServer').innerText = `${data.domainServer}:${data.portServer}${data.pathAPI}`;
+            document.getElementById('webServer').innerText = `${data.webServer}`;
+            document.getElementById('descServer').innerText = `${data.descServer}`;
+            document.getElementById('apiVersion').innerText = `v${data.apiVersion}`;
+        }
+        window.onload = fetchServerInfo;
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-12">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold">
+                        <div id="webServer"></div>
+                    </h1>
+                    <p class="mt-2 text-lg">
+                        <div id="descServer"></div>
+                    </p>
+                </div>
+                <span class="text-xl font-mono px-4 py-2 bg-white bg-opacity-20 rounded-full">
+                    <span id="apiVersion"></span><span class="blinking-cursor">_</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <!-- Introduction -->
+        <section class="mb-16">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">📚 Introduction</h2>
+                    <p class="text-gray-600 mb-6">
+                        Welcome to the IMS API documentation! This RESTful API provides endpoints for managing an Inventory Management System,
+                        built with <span class="font-bold">Bun</span> and the <span class="font-bold">Hono</span> framework.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3 text-gray-800">Base URL</h3>
+                            <code class="bg-gray-200 px-3 py-2 rounded text-gray-800 break-all" id="domainServer">
+                                https://your-api-domain.com/api
+                            </code>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3 text-gray-800">Authentication</h3>
+                            <p class="text-gray-600">
+                                Requires JWT in Authorization header for protected routes.
+                                <br>
+                                <code class="bg-gray-200 px-2 py-1 rounded text-sm mt-2">Authorization: Bearer &lt;token&gt;</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Authentication -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+                <span class="w-12 h-12 flex items-center justify-center bg-purple-100 text-purple-800 rounded-full mr-4">
+                    🔐
+                </span>
+                Authentication
+            </h2>
+
+            <!-- Register -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <span class="endpoint-method method-post mr-3">POST</span>
+                    <code class="text-lg font-mono bg-gray-100 px-4 py-2 rounded">/auth/register</code>
+                </div>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Register a new user account.</p>
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-700 mb-2">Request Body</h4>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">{
+    "username": "string",
+    "email": "string",
+    "password": "string"
+}</code></pre>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-2">Response</h4>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">{
+    "success": true,
+    "message": "User registered successfully",
+    "user": {
+        "id": "123",
+        "username": "newuser",
+        "email": "newuser@example.com"
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <span class="endpoint-method method-post mr-3">POST</span>
+                    <code class="text-lg font-mono bg-gray-100 px-4 py-2 rounded">/auth/login</code>
+                </div>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Authenticate and receive a JWT token.</p>
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-700 mb-2">Request Body</h4>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">{
+    "email": "string",
+    "password": "string"
+}</code></pre>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-2">Response</h4>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">{
+    "success": true,
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+        "id": "123",
+        "username": "existinguser",
+        "email": "existinguser@example.com"
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get User Profile -->
+            <div>
+                <div class="flex items-center mb-4">
+                    <span class="endpoint-method method-get mr-3">GET</span>
+                    <code class="text-lg font-mono bg-gray-100 px-4 py-2 rounded">/auth/me</code>
+                </div>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Get authenticated user's profile. Requires JWT authentication.</p>
+                        <div class="mb-4">
+                            <h4 class="font-semibold text-gray-700 mb-2">Headers</h4>
+                            <code class="bg-gray-200 px-2 py-1 rounded text-sm">Authorization: Bearer &lt;token&gt;</code>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700 mb-2">Response</h4>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">{
+    "success": true,
+    "user": {
+        "id": "123",
+        "username": "existinguser",
+        "email": "existinguser@example.com",
+        "createdAt": "2023-01-01T00:00:00.000Z",
+        "updatedAt": "2023-01-01T00:00:00.000Z"
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Console -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+                <span class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-800 rounded-full mr-4">
+                    💻
+                </span>
+                API Console
+            </h2>
+            
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div id="console-tabs" class="border-b border-gray-200">
+                    <div class="flex -mb-px">
+                        <button onclick="switchTab('console-tab-1')" class="tab-button py-4 px-6 font-medium text-sm border-b-2 border-blue-500 text-blue-600">Try It Out</button>
+                        <button onclick="switchTab('console-tab-2')" class="tab-button py-4 px-6 font-medium text-sm text-gray-500 hover:text-gray-700">CURL</button>
+                        <button onclick="switchTab('console-tab-3')" class="tab-button py-4 px-6 font-medium text-sm text-gray-500 hover:text-gray-700">JavaScript</button>
+                    </div>
+                </div>
+                
+                <div id="console-tab-1" class="tab-content p-6">
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="endpoint-select">Select Endpoint</label>
+                        <select id="endpoint-select" class="block w-full bg-gray-100 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                            <option value="">-- Select an endpoint --</option>
+                            <option value="/auth/register">POST /auth/register</option>
+                            <option value="/auth/login">POST /auth/login</option>
+                            <option value="/auth/me">GET /auth/me</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6" id="request-body-container">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="request-body">Request Body</label>
+                        <textarea id="request-body" class="block w-full h-40 bg-gray-100 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 font-mono text-sm"></textarea>
+                    </div>
+                    
+                    <div class="mb-6" id="auth-token-container" style="display: none;">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="auth-token">Authorization Token</label>
+                        <input id="auth-token" type="text" class="block w-full bg-gray-100 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" placeholder="Bearer token...">
+                    </div>
+                    
+                    <button onclick="sendRequest()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">
+                        Send Request
+                    </button>
+                    
+                    <div class="mt-8">
+                        <h4 class="font-semibold text-gray-700 mb-2">Response</h4>
+                        <pre id="response-container" class="bg-gray-100 p-4 rounded overflow-x-auto h-64"><code class="text-sm">Response will appear here...</code></pre>
+                    </div>
+                </div>
+                
+                <div id="console-tab-2" class="tab-content hidden p-6">
+                    <h4 class="font-semibold text-gray-700 mb-2">CURL Examples</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600 mb-2">Register a user:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">curl -X POST https://your-api-domain.com/api/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{"username":"newuser","email":"newuser@example.com","password":"securepassword"}'</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">Login:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">curl -X POST https://your-api-domain.com/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"existinguser@example.com","password":"securepassword"}'</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">Get user profile:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm">curl -X GET https://your-api-domain.com/api/auth/me \
+    -H "Authorization: Bearer your.jwt.token.here"</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="console-tab-3" class="tab-content hidden p-6">
+                    <h4 class="font-semibold text-gray-700 mb-2">JavaScript Examples</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600 mb-2">Register a user:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm javascript">fetch('https://your-api-domain.com/api/auth/register', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        username: 'newuser',
+        email: 'newuser@example.com',
+        password: 'securepassword'
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">Login:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm javascript">fetch('https://your-api-domain.com/api/auth/login', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        email: 'existinguser@example.com',
+        password: 'securepassword'
+    })
+})
+.then(response => response.json())
+.then(data => {
+    console.log(data);
+    // Save the token to localStorage or elsewhere
+    localStorage.setItem('token', data.token);
+})
+.catch(error => console.error('Error:', error));</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 mb-2">Get user profile:</p>
+                            <pre class="bg-gray-100 p-4 rounded overflow-x-auto"><code class="text-sm javascript">const token = localStorage.getItem('token');
+
+fetch('https://your-api-domain.com/api/auth/me', {
+    method: 'GET',
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 text-gray-500 text-sm">
+            <p>&copy; 2025 IMS API Develop by Ridwan Purwanto. Built with Bun and Hono.</p>
+            <!-- <p class="mt-2">API Version: 1.0.0</p> -->
+        </footer>
+    </main>
+    <script>
+        // Tabs functionality
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
+                button.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            
+            // Show selected tab and mark button as active
+            document.getElementById(tabId).classList.remove('hidden');
+            event.currentTarget.classList.remove('text-gray-500', 'hover:text-gray-700');
+            event.currentTarget.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
+        }
+    
+        // Update UI based on endpoint selection
+        document.getElementById('endpoint-select').addEventListener('change', function() {
+            const selectedEndpoint = this.value;
+            const requestBodyTextarea = document.getElementById('request-body');
+            const authTokenContainer = document.getElementById('auth-token-container');
+            
+            // Reset
+            requestBodyTextarea.value = '';
+            authTokenContainer.style.display = 'none';
+            
+            // Set default request body based on endpoint
+            if (selectedEndpoint === '/auth/register') {
+                requestBodyTextarea.value = JSON.stringify({
+                    username: "newuser",
+                    email: "newuser@example.com",
+                    password: "securepassword123"
+                }, null, 2);
+            } else if (selectedEndpoint === '/auth/login') {
+                requestBodyTextarea.value = JSON.stringify({
+                    email: "user@example.com",
+                    password: "securepassword123"
+                }, null, 2);
+            } else if (selectedEndpoint === '/auth/me') {
+                authTokenContainer.style.display = 'block';
+            }
+        });
+    
+        // Send API request
+        function sendRequest() {
+            const endpointSelect = document.getElementById('endpoint-select');
+            const selectedEndpoint = endpointSelect.value;
+            const requestBody = document.getElementById('request-body').value;
+            const authToken = document.getElementById('auth-token').value;
+            const responseContainer = document.getElementById('response-container');
+            
+            if (!selectedEndpoint) {
+                responseContainer.innerHTML = '<code class="text-sm text-red-500">Please select an endpoint first</code>';
+                return;
+            }
+            
+            responseContainer.innerHTML = '<code class="text-sm">Sending request...</code>';
+            
+            // Simulate API request (in a real implementation, this would be an actual fetch call)
+            setTimeout(() => {
+                let response;
+                
+                if (selectedEndpoint === '/auth/register') {
+                    response = {
+                        success: true,
+                        message: "User registered successfully",
+                        user: {
+                            id: "123",
+                            username: JSON.parse(requestBody).username,
+                            email: JSON.parse(requestBody).email
+                        }
+                    };
+                } else if (selectedEndpoint === '/auth/login') {
+                    response = {
+                        success: true,
+                        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMiLCJ1c2VybmFtZSI6ImV4aXN0aW5ndXNlciIsImVtYWlsIjoiZXhpc3Rpbmd1c2VyQGV4YW1wbGUuY29tIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                        user: {
+                            id: "123",
+                            username: "existinguser",
+                            email: JSON.parse(requestBody).email
+                        }
+                    };
+                } else if (selectedEndpoint === '/auth/me') {
+                    if (!authToken) {
+                        response = {
+                            success: false,
+                            message: "Authorization token required"
+                        };
+                    } else {
+                        response = {
+                            success: true,
+                            user: {
+                                id: "123",
+                                username: "existinguser",
+                                email: "existinguser@example.com",
+                                createdAt: "2023-01-01T00:00:00.000Z",
+                                updatedAt: "2023-01-01T00:00:00.000Z"
+                            }
+                        };
+                    }
+                }
+                
+                responseContainer.innerHTML = `<code class="text-sm">${JSON.stringify(response, null, 2)}</code>`;
+            }, 1000);
+        }
+    </script>    
