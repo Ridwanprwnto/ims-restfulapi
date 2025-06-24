@@ -19,6 +19,7 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "latest",
     "hono": "latest",
+    "jsonwebtoken": "^9.0.2",
     "mariadb": "latest",
     "winston": "latest"
   }

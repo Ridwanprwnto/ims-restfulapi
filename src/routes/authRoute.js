@@ -1,14 +1,13 @@
 import { Hono } from 'hono';
+import { login, validationController } from '../controllers/authController.js';
+import { draftSOController } from '../controllers/draftSOController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
-import { login } from '../controllers/authController.js';
 
 const authRoute = new Hono();
 
 authRoute.post('/login', login);
+authRoute.get('/validation', authMiddleware, validationController);
 
-// Endpoint hanya bisa diakses jika lewat authMiddleware
-authRoute.get('/private/data', authMiddleware, (c) => {
-return c.json({ secret: 'Ini data rahasia hanya untuk user yang valid' });
-});
+authRoute.post('/draftso', draftSOController)
 
 export default authRoute;
