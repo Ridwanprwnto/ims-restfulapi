@@ -1,26 +1,29 @@
 {
-  "name": "ims-api",
-  "module": "src/app.js",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun --watch src/app.js",
-    "dev:hot": "bun --hot src/app.js",
-    "start": "bun src/app.js"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@hono/node-server": "latest",
-    "bcryptjs": "^3.0.2",
-    "dotenv": "latest",
-    "hono": "latest",
-    "jsonwebtoken": "^9.0.2",
-    "mariadb": "latest",
-    "winston": "latest"
-  }
+    "name": "ims-api",
+    "module": "src/app.js",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "bun --watch src/app.js",
+        "dev:hot": "bun --hot src/app.js",
+        "start": "bun src/app.js",
+        "env:dev": "cp .env.development.local .env",
+        "env:test": "cp .env.test.local .env",
+        "env:prod": "cp .env.production.local .env"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "@hono/node-server": "latest",
+        "bcryptjs": "^3.0.2",
+        "dotenv": "latest",
+        "hono": "latest",
+        "jsonwebtoken": "^9.0.2",
+        "mariadb": "latest",
+        "winston": "latest"
+    }
 }
