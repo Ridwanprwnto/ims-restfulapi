@@ -2,13 +2,17 @@ import { getUserByUsername } from "../models/userModel.js";
 import { logInfo, logError } from "../utils/logger.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
 export const login = async (c) => {
+    const { username, password } = await c.req.json();
     try {
-        const { username, password } = await c.req.json();
+        if (!username || !password) {
+            logError("Gagal: No username and password data request");
+            return c.json({ success: false, message: `Gagal: username and password are required` }, 404);
+        }
         const user = await getUserByUsername(username);
 
         if (!user) {
@@ -56,10 +60,10 @@ export const login = async (c) => {
             user: {
                 id: user.nik.toString(),
                 username: user.username,
-                officecode: user.id_office,
-                deptcode: user.id_department,
-                divcode: user.id_divisi,
-                groupid: user.id_group,
+                officeCode: user.id_office,
+                deptCode: user.id_department,
+                divCode: user.id_divisi,
+                groupId: user.id_group,
             },
         });
     } catch (error) {
@@ -71,7 +75,7 @@ export const login = async (c) => {
 export const validationController = async (c) => {
     const userData = c.get("user");
     const now = Math.floor(Date.now() / 1000);
-    
+
     if (!userData || !userData.username) {
         return c.json({ success: false, error: "Token tidak valid atau tidak ada." }, 401);
     }
@@ -87,11 +91,7 @@ export const validationController = async (c) => {
     let newToken = null;
 
     if (isExpired) {
-        newToken = jwt.sign(
-            { id: user.nik.toString(), username: user.username },
-            Bun.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
+        newToken = jwt.sign({ id: user.nik.toString(), username: user.username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
         logInfo(`Token expired. Token diperbarui untuk user ${user.username}`);
     } else {
         logInfo(`Token masih valid untuk user ${user.username}`);
@@ -104,10 +104,10 @@ export const validationController = async (c) => {
         user: {
             id: user.nik.toString(),
             username: user.username,
-            officecode: user.id_office,
-            deptcode: user.id_department,
-            divcode: user.id_divisi,
-            groupid: user.id_group,
+            officeCode: user.id_office,
+            deptCode: user.id_department,
+            divCode: user.id_divisi,
+            groupId: user.id_group,
         },
     });
 };
