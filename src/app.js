@@ -33,20 +33,34 @@ app.get('/api/info', async (c) => {
   return c.json(serverInfo);
 });
 
-const domainsFromEnv = Bun.env.CORS_DOMAINS || "";
-const whitelist = domainsFromEnv.split(",").map(item => item.trim());
-
 app.use(
   '*',
-  cors({
-    origin: (origin) => {
-      if (!origin) return true;
-      if (whitelist.includes(origin)) return true;
+  async (c, next) => {
+    const origin = c.req.header('Origin');
+    const userAgent = c.req.header('User-Agent');
+    const isMobileApp = c.req.header('X-Mobile-Client') === 'true';
+
+    const isDev = Bun.env.NODE_ENV === 'development';
+
+    const whitelist = (Bun.env.CORS_DOMAINS || '')
+      .split(',')
+      .map(d => d.trim())
+      .filter(Boolean);
+
+    const allowOrigin =
+      isDev ||
+      !origin ||
+      whitelist.includes(origin) ||
+      isMobileApp;
+
+    if (!allowOrigin) {
+      console.error(`CORS blocked: ${origin}`);
       logError(`CORS error: ${origin} is not allowed`);
-      return false;
-    },
-    credentials: true
-  })
+      return c.text('CORS Not Allowed', 403);
+    }
+
+    return next();
+  }
 );
 
 app.use('/api/private/*', authMiddleware);
