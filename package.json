@@ -7,9 +7,9 @@
         "dev": "bun --watch src/app.js",
         "dev:hot": "bun --hot src/app.js",
         "start": "bun src/app.js",
-        "env:dev": "cp .env.development.local .env",
-        "env:test": "cp .env.test.local .env",
-        "env:prod": "cp .env.production.local .env"
+        "env:dev": "cp .env.development .env && cp .env.development .env.local",
+        "env:test": "cp .env.test .env && cp .env.test .env.local",
+        "env:prod": "cp .env.production .env && cp .env.production .env.local"
     },
     "devDependencies": {
         "@types/bun": "latest"

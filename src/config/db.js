@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const pool = mariadb.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
+  host: Bun.env.DB_HOST,
+  user: Bun.env.DB_USER,
+  password: Bun.env.DB_PASSWORD,
+  database: Bun.env.DB_NAME,
+  port: Bun.env.DB_PORT,
   connectionLimit: 5
 });

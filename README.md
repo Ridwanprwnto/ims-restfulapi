@@ -1,4 +1,4 @@
-# server-ss-app
+# ims-restapi
 
 To install dependencies:
 

@@ -4,14 +4,14 @@ import { cors } from 'hono/cors';
 import { authMiddleware } from './middleware/authMiddleware.js';
 import authRoute from './routes/authRoute.js';
 import { logger, logInfo, logError } from './utils/logger.js';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-config();
+dotenv.config();
 
 const app = new Hono();
-const PORT = process.env.PORT || 4000;
+const PORT = Bun.env.PORT || 4000;
 
 app.use('*', async (c, next) => {
   logger.info(`${c.req.method} ${c.req.url}`);
@@ -21,19 +21,19 @@ app.use('*', async (c, next) => {
 
 app.get('/api/info', async (c) => {
   const serverInfo = {
-    domainServer: process.env.BASE_URL,
-    webServer: process.env.WEB_SERVER,
-    portServer: process.env.PORT,
-    descServer: process.env.DESC_SERVER,
-    pathAPI: process.env.PATH_API,
-    apiVersion: process.env.API_VERSION,
+    domainServer: Bun.env.BASE_URL,
+    webServer: Bun.env.WEB_SERVER,
+    portServer: Bun.env.PORT,
+    descServer: Bun.env.DESC_SERVER,
+    pathAPI: Bun.env.PATH_API,
+    apiVersion: Bun.env.API_VERSION,
     frameworkVersion: require('../package.json').dependencies.hono
   };
   logInfo('API /api/info diakses');
   return c.json(serverInfo);
 });
 
-const domainsFromEnv = process.env.CORS_DOMAINS || "";
+const domainsFromEnv = Bun.env.CORS_DOMAINS || "";
 const whitelist = domainsFromEnv.split(",").map(item => item.trim());
 
 app.use(

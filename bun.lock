@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "server-ss-app",
+      "name": "ims-api",
       "dependencies": {
         "@hono/node-server": "latest",
         "bcryptjs": "^3.0.2",

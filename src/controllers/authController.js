@@ -2,9 +2,9 @@ import { getUserByUsername } from "../models/userModel.js";
 import { logInfo, logError } from "../utils/logger.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { config } from "dotenv";
+import dotenv from 'dotenv';
 
-config();
+dotenv.config();
 
 export const login = async (c) => {
     try {
@@ -47,7 +47,7 @@ export const login = async (c) => {
             return c.json({ success: false, error: `akses login ${username} dinonaktifkan` }, 401);
         }
 
-        const token = jwt.sign({ id: user.nik.toString(), username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ id: user.nik.toString(), username: user.username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
 
         logInfo(`Login berhasil untuk user ${username}`);
         return c.json({
@@ -78,7 +78,7 @@ export const validationController = async (c) => {
         return c.json({ success: false, error: "User tidak ditemukan" }, 404);
     }
 
-    const newToken = jwt.sign({ id: user.nik.toString(), username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const newToken = jwt.sign({ id: user.nik.toString(), username: user.username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
 
     logInfo(`Berhasil validasi token untuk user ${user.username}`);
     return c.json({

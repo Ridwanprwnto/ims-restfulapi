@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 import { logInfo, logError } from '../utils/logger.js';
 
-config();
+dotenv.config();
 
 export const authMiddleware = async (c, next) => {
   const authHeader = c.req.header("Authorization");
@@ -15,7 +15,7 @@ export const authMiddleware = async (c, next) => {
 
   try {
     // Verifikasi dan dekode token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, Bun.env.JWT_SECRET);
     
     // Simpan informasi pengguna di context
     c.set('user', decoded);
