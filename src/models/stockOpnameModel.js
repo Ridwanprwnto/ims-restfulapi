@@ -5,7 +5,11 @@ export const getDraftSO = async (office, department) => {
     let conn;
     try {
         conn = await pool.getConnection();
-        const query = `SELECT no_so, tgl_so FROM head_stock_opname WHERE office_so = ? AND dept_so = ? AND jenis_so = ? AND status_so = ?`;
+        const query = `SELECT A.no_so, A.tgl_so, C.NamaBarang, D.NamaJenis FROM head_stock_opname AS A 
+        INNER JOIN detail_stock_opname AS B ON A.no_so = B.no_so_head
+        INNER JOIN mastercategory AS C ON LEFT(B.pluid_so, 6) = C.IDBarang
+        INNER JOIN masterjenis AS D ON RIGHT(B.pluid_so, 4) = D.IDJenis
+        WHERE A.office_so = ? AND A.dept_so = ? AND A.jenis_so = ? AND A.status_so = ? ORDER BY A.no_so ASC`;
         const rows = await conn.query(query, [office, department, 1, "N"]);
         return rows;
     } catch (err) {
@@ -39,7 +43,7 @@ export const getUpdateSO = async (noref, noid) => {
     let conn;
     try {
         conn = await pool.getConnection();
-        const query = `SELECT A.pluid_so_asset, A.sn_so_asset, A.noat_so_asset, B.NamaBarang, C.NamaJenis FROM asset_stock_opname AS A 
+        const query = `SELECT A.pluid_so_asset, A.sn_so_asset, A.noat_so_asset, A.kondisi_so_asset, B.NamaBarang, C.NamaJenis FROM asset_stock_opname AS A 
     INNER JOIN mastercategory AS B ON LEFT(A.pluid_so_asset, 6) = B.IDBarang
     INNER JOIN masterjenis AS C ON RIGHT(A.pluid_so_asset, 4) = C.IDJenis
     WHERE A.noref_so_asset = ? AND A.sn_so_asset = ?`;
@@ -69,7 +73,7 @@ export const getPresentaseSO = async (noref) => {
     }
 };
 
-export const postUpdateSO = async (noref, nocode, noid, condition, location) => {
+export const postUpdateSO = async (noref, nocode, noid, condition, location, user, savedFilename, datetime) => {
     let conn;
     try {
         conn = await pool.getConnection();
@@ -117,13 +121,16 @@ export const postUpdateSO = async (noref, nocode, noid, condition, location) => 
             }
         }
 
-        await conn.query(`UPDATE asset_stock_opname SET kondisi_so_asset = ?, lokasi_so_asset = ? WHERE noref_so_asset = ? AND pluid_so_asset = ? AND sn_so_asset = ?`, [
-            kondisi,
-            lokasi,
-            noref,
-            nocode,
-            noid,
-        ]);
+        await conn.query(
+            `UPDATE asset_stock_opname 
+   SET kondisi_so_asset = ?, 
+       lokasi_so_asset = ?, 
+       user_so_asset = ?, 
+       photo_so_asset = ${savedFilename ? "?" : "NULL"}, 
+       date_so_asset = ? 
+   WHERE noref_so_asset = ? AND pluid_so_asset = ? AND sn_so_asset = ?`,
+            savedFilename ? [kondisi, lokasi, user, savedFilename, datetime, noref, nocode, noid] : [kondisi, lokasi, user, datetime, noref, nocode, noid]
+        );
 
         const result = `Data Noref ${noref} ID ${nocode} SN ${noid} berhasil diperbarui`;
         return result;

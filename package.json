@@ -20,6 +20,7 @@
     "dependencies": {
         "@hono/node-server": "latest",
         "bcryptjs": "^3.0.2",
+        "date-fns": "^4.1.0",
         "dotenv": "latest",
         "hono": "latest",
         "jsonwebtoken": "^9.0.2",

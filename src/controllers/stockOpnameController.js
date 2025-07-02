@@ -1,5 +1,8 @@
 import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO } from "../models/stockOpnameModel.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
 
 export const draftSOController = async (c) => {
     const { office, department } = await c.req.json();
@@ -16,10 +19,37 @@ export const draftSOController = async (c) => {
             return c.json({ success: false, message: "No draft SO found" }, 404);
         }
 
-        const response = dataDraftSO.map((item) => ({
-            noRefSO: item.no_so,
-            tglSO: item.tgl_so,
-        }));
+        const groupedResponse = dataDraftSO.reduce((acc, item) => {
+            const key = `${item.no_so}-${item.tgl_so}`;
+
+            const date = new Date(item.tgl_so);
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            const formattedDate = `${day}-${month}-${year}`;
+
+            if (!acc[key]) {
+                acc[key] = {
+                    noRefSO: item.no_so,
+                    tglSO: formattedDate,
+                    itemsSO: item.NamaBarang + " " + item.NamaJenis,
+                };
+            } else {
+                acc[key].itemsSO += `, ${item.NamaBarang} ${item.NamaJenis}`;
+            }
+            return acc;
+        }, {});
+
+        const response = Object.values(groupedResponse);
+
+        for (const item of response) {
+            const presentaseData = await getPresentaseSO(item.noRefSO);
+            const totalUpdate = presentaseData[0]?.totalUpdate || 0;
+            const totalAsset = presentaseData[0]?.totalAsset || 1; // Menghindari pembagian dengan nol
+            const totalUpdateNumber = Number(totalUpdate);
+            const totalAssetNumber = Number(totalAsset);
+            item.persentaseSO = `${((totalUpdateNumber * 100) / totalAssetNumber).toFixed(2)}%`;
+        }
 
         logInfo(`data draft opname found`);
         return c.json({ success: true, data: response }, 200);
@@ -43,6 +73,12 @@ export const itemSOController = async (c) => {
             return c.json({ success: false, message: "No data item SO found" }, 404);
         }
 
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+            return date.toLocaleDateString("id-ID", options);
+        };
+
         const response = dataItemSO.map((item) => ({
             idBarang: item.pluid_so,
             descBarang: item.NamaBarang + " " + item.NamaJenis,
@@ -53,7 +89,7 @@ export const itemSOController = async (c) => {
         return c.json(
             {
                 success: true,
-                date: dataItemSO[0].tgl_so,
+                date: formatDate(dataItemSO[0].tgl_so),
                 data: response,
             },
             200
@@ -84,6 +120,7 @@ export const updateSOController = async (c) => {
             descBarang: item.NamaBarang + " " + item.NamaJenis,
             snBarang: item.sn_so_asset,
             datBarang: item.noat_so_asset,
+            konBarang: item.kondisi_so_asset ? true : false,
         }));
 
         logInfo(`Data opname ID ${noid} noref ${noref} found`);
@@ -151,17 +188,36 @@ const getPersentaseSOResponse = async (noref) => {
 };
 
 export const saveSOController = async (c) => {
-    const { noref, nocode, noid, condition, location } = await c.req.json();
+    const { noref, nocode, noid, condition, location, user, photo } = await c.req.json();
     try {
-        if (!noref || !nocode || !noid || !condition || !location) {
+        if (!noref || !nocode || !noid || !condition || !location || !user) {
             logError("Gagal: No ref, code, id, kondisi, and lokasi are required");
             return c.json({ success: false, message: `Gagal: ref, code, id, kondisi, and lokasi are required` }, 404);
         }
 
-        const result = await postUpdateSO(noref, nocode, noid, condition, location);
+        let savedFilename = null;
 
-        console.log(result);
+        if (photo && photo.startsWith("data:image/")) {
+            const matches = photo.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (matches) {
+                const ext = matches[1];
+                const base64Data = matches[2];
+                const buffer = Buffer.from(base64Data, "base64");
 
+                const filename = `photo-${Date.now()}-${randomUUID()}.${ext}`;
+                const filepath = path.resolve("files", filename);
+                await writeFile(filepath, buffer);
+                savedFilename = filename;
+            }
+        }
+
+        function getLocalDatetimeSQL(offsetHours = 7) {
+            const localTime = new Date(Date.now() + offsetHours * 60 * 60 * 1000);
+            return localTime.toISOString().slice(0, 19).replace("T", " ");
+        }
+        const formattedDatetime = getLocalDatetimeSQL();
+
+        const result = await postUpdateSO(noref, nocode, noid, condition, location, user, savedFilename, formattedDatetime);
         const response = await getPersentaseSOResponse(noref);
 
         logInfo(`Ref ${noref} id ${nocode} sn ${noid} recorded successfully`);
