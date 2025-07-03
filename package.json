@@ -25,7 +25,7 @@
         "hono": "latest",
         "jsonwebtoken": "^9.0.2",
         "mariadb": "latest",
-        "smbclient": "^1.0.3",
+        "samba-client": "^7.2.0",
         "winston": "latest"
     }
 }
