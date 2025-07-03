@@ -11,6 +11,7 @@
         "hono": "latest",
         "jsonwebtoken": "^9.0.2",
         "mariadb": "latest",
+        "smbclient": "^1.0.3",
         "winston": "latest",
       },
       "devDependencies": {
@@ -121,6 +122,8 @@
     "semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
 
     "simple-swizzle": ["simple-swizzle@0.2.2", "", { "dependencies": { "is-arrayish": "^0.3.1" } }, "sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg=="],
+
+    "smbclient": ["smbclient@1.0.3", "", {}, "sha512-L5A+5Ki1Cq+jENTo6/xiTmu4dCloLF0oPMi+X2umerjgHJQE6dO/qP5HBP5L3mJcs9GbOFtKBq+S4UhYb8WKoA=="],
 
     "stack-trace": ["stack-trace@0.0.10", "", {}, "sha512-KGzahc7puUKkzyMt+IqAep+TVNbKP+k2Lmwhub39m1AsTSkaDutx56aDCo+HLDzf/D26BIHTJWNiTG1KAJiQCg=="],
 

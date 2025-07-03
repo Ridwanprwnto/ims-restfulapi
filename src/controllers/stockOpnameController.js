@@ -1,8 +1,10 @@
-import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO } from "../models/stockOpnameModel.js";
-import { logInfo, logError } from "../utils/logger.js";
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
+import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO, getCheckPhotoSO } from "../models/stockOpnameModel.js";
 import { randomUUID } from "node:crypto";
+import SmbClient from "smbclient";
+import dotenv from "dotenv";
+import { logInfo, logError } from "../utils/logger.js";
+
+dotenv.config();
 
 export const draftSOController = async (c) => {
     const { office, department } = await c.req.json();
@@ -197,6 +199,8 @@ export const saveSOController = async (c) => {
 
         let savedFilename = null;
 
+        const oldPhotoFilename = await getOldPhotoFilename(noref, nocode, noid);
+
         if (photo && photo.startsWith("data:image/")) {
             const matches = photo.match(/^data:image\/(\w+);base64,(.+)$/);
             if (matches) {
@@ -205,10 +209,25 @@ export const saveSOController = async (c) => {
                 const buffer = Buffer.from(base64Data, "base64");
 
                 const filename = `photo-${Date.now()}-${randomUUID()}.${ext}`;
-                const filepath = path.resolve("files", filename);
-                await writeFile(filepath, buffer);
-                savedFilename = filename;
+
+                // Upload ke server NAS
+                const uploadSuccess = await uploadToSamba(buffer, filename);
+                if (uploadSuccess) {
+                    savedFilename = filename;
+                    // Hapus foto lama jika ada dan upload foto baru berhasil
+                    if (oldPhotoFilename && oldPhotoFilename !== filename) {
+                        await deleteFromSamba(oldPhotoFilename);
+                    }
+                } else {
+                    logError(`Gagal upload file ${filename} ke server NAS`);
+                    return c.json({ success: false, message: `Gagal upload file ke server NAS` }, 500);
+                }
             }
+        } else {
+            if (oldPhotoFilename && photo === null) {
+                await deleteFromSamba(oldPhotoFilename);
+            }
+            logInfo(`oldphoto ${oldPhotoFilename} photo ${photo}`);
         }
 
         function getLocalDatetimeSQL(offsetHours = 7) {
@@ -234,3 +253,80 @@ export const saveSOController = async (c) => {
         return c.json({ success: false, message: `Failed to fetch item ${noid} noref ${noref}`, error: err.message }, 500);
     }
 };
+
+// Fungsi untuk mendapatkan nama file foto lama
+async function getOldPhotoFilename(noref, nocode, noid) {
+    try {
+        const rows = await getCheckPhotoSO(noref, nocode, noid);
+        return rows?.photo_so_asset || null;
+    } catch (error) {
+        logError(`Error getting old photo filename:`, error);
+        return null;
+    }
+}
+
+// Fungsi untuk upload file ke server NAS via Samba
+async function uploadToSamba(buffer, filename) {
+    try {
+        const client = new SmbClient({
+            host: Bun.env.NAS_HOST,
+            username: Bun.env.NAS_USER,
+            password: Bun.env.NAS_PASSWORD,
+            share: Bun.env.NAS_SHARE_NAME,
+            timeout: 30000,
+        });
+
+        await client.connect();
+
+        const remotePath = `${Bun.env.NAS_PATH}${filename}`;
+
+        await client.writeFile(remotePath, buffer);
+        await client.disconnect();
+
+        logInfo(`File ${filename} berhasil diupload ke server NAS`);
+        return true;
+    } catch (error) {
+        logError(`Error upload file ${filename} ke server NAS:`, error);
+        return false;
+    }
+}
+
+// Fungsi untuk menghapus file dari server NAS via Samba
+async function deleteFromSamba(filename) {
+    let client;
+    try {
+        client = new SmbClient({
+            host: Bun.env.NAS_HOST,
+            username: Bun.env.NAS_USER,
+            password: Bun.env.NAS_PASSWORD,
+            share: Bun.env.NAS_SHARE_NAME,
+            timeout: 30000,
+        });
+
+        await client.connect();
+
+        const remotePath = `${Bun.env.NAS_PATH}${filename}`;
+
+        // Cek apakah file ada sebelum menghapus
+        const fileExists = await client.exists(remotePath);
+        if (fileExists) {
+            await client.deleteFile(remotePath);
+            logInfo(`File ${filename} berhasil dihapus dari server NAS`);
+        } else {
+            logInfo(`File ${filename} tidak ditemukan di server NAS`);
+        }
+
+        return true;
+    } catch (error) {
+        logError(`Error deleting file ${filename} dari server NAS:`, error);
+        return false;
+    } finally {
+        if (client) {
+            try {
+                await client.disconnect();
+            } catch (disconnectError) {
+                logError(`Error disconnecting from NAS:`, disconnectError);
+            }
+        }
+    }
+}
