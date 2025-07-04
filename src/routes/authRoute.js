@@ -18,6 +18,6 @@ authRoute.post("/updateso", updateSOController);
 authRoute.post("/persentaseso", persentaseSOController);
 authRoute.post("/saveso", saveSOController);
 
-authRoute.post("/help", helpController);
+authRoute.post("/upload-log", helpController);
 
 export default authRoute;

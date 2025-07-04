@@ -1,25 +1,36 @@
 import { logInfo, logError } from "../utils/logger.js";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import fs from "node:fs";
 
 export const helpController = async (c) => {
-    const { message, log } = await c.req.json();
     try {
-        if (!message || !log) {
-            logError("Gagal: No message and log data request");
-            return c.json({ success: false, message: `Gagal: Message and log are required` }, 404);
+        const formData = await c.req.formData();
+
+        const file = formData.get("file");
+        const platform = formData.get("platform");
+        const timestamp = formData.get("timestamp");
+        const message = formData.get("message");
+
+        if (!file || !file.name || !file.stream) {
+            logError("Gagal: No file uploaded");
+            return c.json({ success: false, message: "No file uploaded" }, 400);
         }
 
-        logInfo(`Success receive log data client`);
-        return c.json(
-            {
-                success: true,
-                message: "Success receive log data client",
-            },
-            200
-        );
+        const logsDir = path.resolve("files/logs");
+        const filePath = path.join(logsDir, file.name);
+
+        if (!fs.existsSync(logsDir)) {
+            fs.mkdirSync(logsDir, { recursive: true });
+        }
+
+        const buffer = await file.arrayBuffer();
+        await writeFile(filePath, Buffer.from(buffer));
+
+        logInfo(`Log file saved to: ${filePath}`);
+        return c.json({ success: true, message: "Log file uploaded successfully" }, 200);
     } catch (err) {
-        logError(`Gagal: `, err);
-        return c.json({ success: false, message: `Failed to fetch log client`, error: err.message }, 500);
+        logError("Gagal upload log:", err);
+        return c.json({ success: false, message: "Server error", error: err.message }, 500);
     }
 };
