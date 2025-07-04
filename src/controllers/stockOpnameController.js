@@ -1,10 +1,9 @@
 import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO, getCheckPhotoSO } from "../models/stockOpnameModel.js";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 import { randomUUID } from "node:crypto";
-import SambaClient from "samba-client";
-import dotenv from "dotenv";
 import { logInfo, logError } from "../utils/logger.js";
-
-dotenv.config();
+import { deleteFile } from "../utils/fileHelper";
 
 export const draftSOController = async (c) => {
     const { office, department } = await c.req.json();
@@ -209,23 +208,19 @@ export const saveSOController = async (c) => {
                 const buffer = Buffer.from(base64Data, "base64");
 
                 const filename = `photo-${Date.now()}-${randomUUID()}.${ext}`;
+                const filepath = path.resolve("files/opname", filename);
 
-                // Upload ke server NAS
-                const uploadSuccess = await uploadToSambaClient(buffer, filename);
-                if (uploadSuccess) {
-                    savedFilename = filename;
-                    // Hapus foto lama jika ada dan upload foto baru berhasil
-                    if (oldPhotoFilename && oldPhotoFilename !== filename) {
-                        await deleteFromSambaClient(oldPhotoFilename);
-                    }
-                } else {
-                    logError(`Gagal upload file ${filename} ke server NAS`);
-                    return c.json({ success: false, message: `Gagal upload file ke server NAS` }, 500);
+                await writeFile(filepath, buffer);
+                savedFilename = filename;
+                if (oldPhotoFilename) {
+                    const oldFilePath = path.join("files/opname", oldPhotoFilename);
+                    await deleteFile(oldFilePath);
                 }
             }
         } else {
             if (oldPhotoFilename && photo === null) {
-                await deleteFromSambaClient(oldPhotoFilename);
+                const oldFilePath = path.join("files/opname", oldPhotoFilename);
+                await deleteFile(oldFilePath);
             }
         }
 
@@ -261,55 +256,5 @@ async function getOldPhotoFilename(noref, nocode, noid) {
     } catch (error) {
         logError(`Error getting old photo filename:`, error);
         return null;
-    }
-}
-async function uploadToSambaClient(buffer, filename) {
-    try {
-        const client = new SambaClient({
-            address: Bun.env.NAS_HOST,
-            username: Bun.env.NAS_USER,
-            password: Bun.env.NAS_PASSWORD,
-            domain: Bun.env.WORKGROUP,
-            timeout: 30000,
-        });
-
-        // Buat file temporary terlebih dahulu
-        const tempPath = `/tmp/${filename}`;
-        await writeFile(tempPath, buffer);
-
-        // Upload ke server
-        const remotePath = `${Bun.env.NAS_PATH}${filename}`.replace(/^\//, "");
-        await client.sendFile(tempPath, `${Bun.env.NAS_SHARE_NAME}/${remotePath}`);
-
-        // Hapus file temporary
-        await unlink(tempPath);
-
-        logInfo(`File ${filename} berhasil diupload ke server NAS`);
-        return true;
-    } catch (error) {
-        logError(`Error upload file ${filename} ke server NAS:`, error);
-        return false;
-    }
-}
-
-// Fungsi untuk menghapus file dari server NAS via Samba
-async function deleteFromSambaClient(filename) {
-    try {
-        const client = new SambaClient({
-            address: Bun.env.NAS_HOST,
-            username: Bun.env.NAS_USER,
-            password: Bun.env.NAS_PASSWORD,
-            domain: Bun.env.WORKGROUP,
-            timeout: 30000,
-        });
-
-        const remotePath = `${Bun.env.NAS_SHARE_NAME}/${Bun.env.NAS_PATH}${filename}`.replace(/^\//, "");
-        await client.deleteFile(remotePath);
-
-        logInfo(`File ${filename} berhasil dihapus dari server NAS`);
-        return true;
-    } catch (error) {
-        logError(`Error deleting file ${filename} dari server NAS:`, error);
-        return false;
     }
 }

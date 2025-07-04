@@ -1,5 +1,6 @@
 import { pool } from "../config/db.js";
 import { logError } from "../utils/logger.js";
+import path from "node:path";
 
 export const getDraftSO = async (office, department) => {
     let conn;
