@@ -1,8 +1,8 @@
 import { getUserByUsername } from "../models/userModel.js";
 import { getKondisiModel } from "../models/kondisiModel.js";
-import { logInfo, logError } from "../utils/logger.js";
+import { logInfo } from "../utils/logger.js";
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -26,11 +26,7 @@ export const kondisiController = async (c) => {
     let newToken = null;
 
     if (isExpired) {
-        newToken = jwt.sign(
-            { id: user.nik.toString(), username: user.username },
-            Bun.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
+        newToken = jwt.sign({ id: user.nik.toString(), username: user.username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
         logInfo(`Token expired. Token diperbarui untuk user ${user.username}`);
     } else {
         logInfo(`Token masih valid untuk user ${user.username}`);
@@ -43,15 +39,29 @@ export const kondisiController = async (c) => {
         return c.json({ success: false, error: "Data kondisi tidak ditemukan" }, 404);
     }
 
-    const response = kondisi.map(item => ({
+    const response = kondisi.map((item) => ({
         idKondisi: item.id_kondisi,
-        nameKondisi: item.kondisi_name
+        nameKondisi: item.kondisi_name,
     }));
 
     return c.json({
         success: true,
         ...(newToken && { token: newToken }),
         message: "Access granted",
-        kondisi: response
+        kondisi: response,
+        ...(newToken && {
+            user: {
+                id: user.nik.toString(),
+                username: user.username,
+                officeCode: user.id_office,
+                deptCode: user.id_department,
+                divCode: user.id_divisi,
+                groupId: user.id_group,
+                officeName: user.office_name,
+                deptName: user.department_name,
+                divName: user.divisi_name,
+                groupName: user.group_name,
+            },
+        }),
     });
 };
