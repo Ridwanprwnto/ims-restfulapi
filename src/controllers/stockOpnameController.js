@@ -172,22 +172,6 @@ export const persentaseSOController = async (c) => {
     }
 };
 
-// helper function getPersentaseSOResponse
-const getPersentaseSOResponse = async (noref) => {
-    if (!noref) throw new Error("Noref is required");
-
-    const dataPersentaseSO = await getPresentaseSO(noref);
-
-    if (!dataPersentaseSO || dataPersentaseSO.length === 0) {
-        throw new Error(`Noref ${noref} not found`);
-    }
-
-    return dataPersentaseSO.map((item) => ({
-        itemUpdate: item.totalUpdate ? item.totalUpdate : "0",
-        itemDraft: item.totalAsset.toString(),
-    }));
-};
-
 export const saveSOController = async (c) => {
     const { noref, nocode, noid, condition, location, user, photo } = await c.req.json();
     try {
@@ -231,14 +215,19 @@ export const saveSOController = async (c) => {
         const formattedDatetime = getLocalDatetimeSQL();
 
         const result = await postUpdateSO(noref, nocode, noid, condition, location, user, savedFilename, formattedDatetime);
-        const response = await getPersentaseSOResponse(noref);
+        const response = await getPresentaseSO(noref);
+
+        const dataPersentaseSO = response.map((item) => ({
+            itemUpdate: item.totalUpdate ? item.totalUpdate : "0",
+            itemDraft: item.totalAsset.toString(),
+        }));
 
         logInfo(`Ref ${noref} id ${nocode} sn ${noid} recorded successfully`);
         return c.json(
             {
                 success: true,
                 message: result,
-                data: response,
+                data: dataPersentaseSO,
             },
             200
         );
