@@ -6,8 +6,8 @@ import dotenv from "dotenv";
 
 import { logger } from "./utils/logger.js";
 import corsChecker from "./middleware/corsChecker.js";
-import handleServerInfo from "./handlers/serverInfo.js";
-import services from "./services/services.js";
+import restServices from "./services/index.js";
+import sobiServices from "./services/sobiServices.js";
 
 dotenv.config();
 
@@ -24,11 +24,11 @@ app.use("*", async (c, next) => {
 // CORS
 app.use("*", corsChecker);
 
-// Server Info
-app.get(Bun.env.PATH_API + Bun.env.PATH_API_INFO, handleServerInfo);
+// Layanan Utama
+app.route(Bun.env.PATH_API, restServices);
 
-// Layanan utama
-app.route(Bun.env.PATH_API, services);
+// Layanan sobi
+app.route(Bun.env.PATH_API_SOBI, sobiServices);
 
 // Static index.html
 app.get("/", async (c) => {

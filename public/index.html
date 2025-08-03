@@ -44,7 +44,7 @@
     </style>
     <script>
         async function fetchServerInfo() {
-            const response = await fetch('/api/info');
+            const response = await fetch('/api-ims/info');
             const data = await response.json();
             document.getElementById('domainServer').innerText = `${data.domainServer}:${data.portServer}${data.pathAPI}`;
             document.getElementById('webServer').innerText = `${data.webServer}`;
