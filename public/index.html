@@ -50,6 +50,11 @@
             document.getElementById('webServer').innerText = `${data.webServer}`;
             document.getElementById('descServer').innerText = `${data.descServer}`;
             document.getElementById('apiVersion').innerText = `v${data.apiVersion}`;
+            
+            const developerName = data.developer;
+            const personalWebLink = data.personalWeb;
+
+            document.getElementById('footer').innerHTML = `&copy; 2025 IMS API Developed by <a id="personalWeb" target="_blank" href="${personalWebLink}" class="text-blue-500 hover:underline">${developerName}</a>. Built with Bun and Hono.`;
         }
         window.onload = fetchServerInfo;
     </script>
@@ -286,7 +291,7 @@ fetch('https://api-domain.com/api/auth/validation', {
 
         <!-- Footer -->
         <footer class="text-center py-8 text-gray-500 text-sm">
-            <p>&copy; 2025 IMS API Develop by Ridwan Purwanto. Built with Bun and Hono.</p>
+            <p id="footer">&copy; <a id="personalWeb" target="_blank" href="" class="text-blue-500 hover:underline"></a></p>
             <!-- <p class="mt-2">API Version: 1.0.0</p> -->
         </footer>
     </main>
