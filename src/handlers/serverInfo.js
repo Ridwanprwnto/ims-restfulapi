@@ -6,8 +6,10 @@ const handleServerInfo = async (c) => {
         webServer: Bun.env.WEB_SERVER,
         portServer: Bun.env.PORT,
         descServer: Bun.env.DESC_SERVER,
-        pathAPI: Bun.env.PATH_API + "/info",
+        pathAPI: Bun.env.PATH_API,
         apiVersion: Bun.env.API_VERSION,
+        developer: Bun.env.DEVELOPER,
+        personalWeb: Bun.env.PERSONAL_WEB,
         frameworkVersion: require("../../package.json").dependencies.hono,
     };
     logInfo(`API ${Bun.env.PATH_API}/info diakses`);
