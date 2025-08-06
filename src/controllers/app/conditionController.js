@@ -1,12 +1,12 @@
-import { getUserByUsername } from "../models/userModel.js";
-import { getKondisiModel } from "../models/kondisiModel.js";
-import { logInfo } from "../utils/logger.js";
+import { getUserByUsername } from "../../models/sobi/userModel.js";
+import { getKondisiModel } from "../../models/sobi/kondisiModel.js";
+import { logInfo } from "../../utils/logger.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-export const kondisiController = async (c) => {
+export const conditionController = async (c) => {
     const userData = c.get("user");
     const now = Math.floor(Date.now() / 1000);
 

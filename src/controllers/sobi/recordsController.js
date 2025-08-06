@@ -1,9 +1,9 @@
-import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO, getCheckPhotoSO } from "../models/stockOpnameModel.js";
+import { getDraftSO, getItemSO, getUpdateSO, getPresentaseSO, postUpdateSO, getCheckPhotoSO } from "../../models/sobi/stockOpnameModel.js";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { logInfo, logError } from "../utils/logger.js";
-import { deleteFile } from "../utils/fileHelper";
+import { logInfo, logError } from "../../utils/logger.js";
+import { deleteFile } from "../../utils/fileHelper.js";
 
 export const draftSOController = async (c) => {
     const { office, department } = await c.req.json();
@@ -101,7 +101,7 @@ export const itemSOController = async (c) => {
     }
 };
 
-export const updateSOController = async (c) => {
+export const processSOController = async (c) => {
     const { noref, noid } = await c.req.json();
     try {
         if (!noref || !noid) {
@@ -173,7 +173,8 @@ export const persentaseSOController = async (c) => {
 };
 
 export const saveSOController = async (c) => {
-    const { noref, nocode, noid, condition, location, user, photo } = await c.req.json();
+    const noref = c.req.param("norefId");
+    const { nocode, noid, condition, location, user, photo } = await c.req.json();
     try {
         if (!noref || !nocode || !noid || !condition || !location || !user) {
             logError("Gagal: No ref, code, id, kondisi, and lokasi are required");

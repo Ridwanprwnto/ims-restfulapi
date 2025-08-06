@@ -14,7 +14,9 @@ export const authMiddleware = async (c, next) => {
     const token = authHeader.split(" ")[1];
 
     try {
-        const decoded = jwt.verify(token, Bun.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+            algorithms: ["HS256"],
+        });
 
         c.set("user", decoded);
 
