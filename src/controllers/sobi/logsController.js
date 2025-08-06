@@ -1,9 +1,9 @@
-import { logInfo, logError } from "../utils/logger.js";
+import { logInfo, logError } from "../../utils/logger.js";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import fs from "node:fs";
 
-export const helpController = async (c) => {
+export const logController = async (c) => {
     try {
         const formData = await c.req.formData();
 

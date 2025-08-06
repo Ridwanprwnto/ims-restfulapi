@@ -1,4 +1,4 @@
-import { logInfo } from "../utils/logger.js";
+import { logInfo } from "../../utils/logger.js";
 
 const handleServerInfo = async (c) => {
     const serverInfo = {
@@ -10,9 +10,9 @@ const handleServerInfo = async (c) => {
         apiVersion: Bun.env.API_VERSION,
         developer: Bun.env.DEVELOPER,
         personalWeb: Bun.env.PERSONAL_WEB,
-        frameworkVersion: require("../../package.json").dependencies.hono,
+        frameworkVersion: require("../../../package.json").dependencies.hono,
     };
-    logInfo(`API ${Bun.env.PATH_API}/info diakses`);
+    logInfo(`API ${Bun.env.PATH_API}/app/info diakses`);
     return c.json(serverInfo);
 };
 

@@ -1,12 +1,12 @@
 {
     "name": "ims-api",
-    "module": "src/app.js",
+    "module": "server.js",
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "bun --watch src/app.js",
-        "dev:hot": "bun --hot src/app.js",
-        "start": "bun src/app.js",
+        "dev": "bun --watch server.js",
+        "dev:hot": "bun --hot server.js",
+        "start": "bun server.js",
         "env:dev": "cp .env.development .env && cp .env.development .env.local",
         "env:test": "cp .env.test .env && cp .env.test .env.local",
         "env:prod": "cp .env.production .env && cp .env.production .env.local"
