@@ -60,6 +60,7 @@ export const loginUser = async (c) => {
             user: {
                 id: user.nik.toString(),
                 username: user.username,
+                email: user.email,
                 officeCode: user.id_office,
                 deptCode: user.id_department,
                 divCode: user.id_divisi,
