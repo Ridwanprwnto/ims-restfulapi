@@ -32,7 +32,7 @@ export const conditionController = async (c) => {
         newToken = jwt.sign({ id: user.nik.toString(), username: user.username, iss: Bun.env.KEY }, Bun.env.JWT_SECRET, { algorithm: "HS256", expiresIn: "1h" });
         logInfo(`Token expired. Token diperbarui untuk user ${user.username}`);
     } else {
-        logInfo(`Token masih valid dengan sisa waktu ${userData.exp} untuk user ${user.username}`);
+        logInfo(`Token masih valid dengan sisa waktu ${remainingFormatted} untuk user ${user.username}`);
     }
 
     const kondisi = await getKondisiModel();
