@@ -1,5 +1,6 @@
 import { getUserByUsername } from "../../models/sobi/userModel.js";
 import { logInfo } from "../../utils/logger.js";
+import { formatTimeRemaining } from "../../utils/formatTimeRemaining.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -13,6 +14,8 @@ export const tokenController = async (c) => {
         return c.json({ success: false, message: "Token tidak valid atau tidak ada." }, 401);
     }
     const isExpired = userData.exp && userData.exp < now;
+    const remainingSeconds = isExpired ? 0 : Math.max(0, userData.exp - now);
+    const remainingFormatted = formatTimeRemaining(remainingSeconds);
 
     const user = await getUserByUsername(userData.username);
 
@@ -24,15 +27,16 @@ export const tokenController = async (c) => {
     let newToken = null;
 
     if (isExpired) {
-        newToken = jwt.sign({ id: user.nik.toString(), username: user.username }, Bun.env.JWT_SECRET, { expiresIn: "1h" });
+        newToken = jwt.sign({ id: user.nik.toString(), username: user.username, iss: Bun.env.KEY }, Bun.env.JWT_SECRET, { algorithm: "HS256", expiresIn: "1h" });
         logInfo(`Token expired. Token diperbarui untuk user ${user.username}`);
     } else {
-        logInfo(`Token masih valid untuk user ${user.username}`);
+        logInfo(`Token masih valid dengan sisa waktu ${remainingFormatted} untuk user ${user.username}`);
     }
 
     return c.json({
         success: true,
         ...(newToken && { token: newToken }),
+        expired: `Sisa waktu token ${remainingFormatted}`,
         message: "Access granted",
         user: {
             id: user.nik.toString(),
