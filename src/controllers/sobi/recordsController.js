@@ -192,7 +192,7 @@ export const saveSOController = async (c) => {
                 const base64Data = matches[2];
                 const buffer = Buffer.from(base64Data, "base64");
 
-                const filename = `photo-${Date.now()}-${randomUUID()}.${ext}`;
+                const filename = `${noref}-${Date.now()}-${randomUUID()}.${ext}`;
                 const filepath = path.resolve("files/opname", filename);
 
                 await writeFile(filepath, buffer);
