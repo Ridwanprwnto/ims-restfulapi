@@ -33,6 +33,15 @@ app.get("/", async (c) => {
     return c.html(html);
 });
 
+app.get("/style.css", async (c) => {
+    const css = await readFile(join(import.meta.dir, "../public/style.css"), "utf-8");
+    return new Response(css, {
+        headers: {
+            "Content-Type": "text/css"
+        }
+    });
+});
+
 // Not Found handler
 app.notFound((c) => {
     return c.json({ message: "Endpoint tidak ditemukan" }, 404);
