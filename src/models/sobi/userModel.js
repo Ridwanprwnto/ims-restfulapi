@@ -9,8 +9,8 @@ export const getUserByUsername = async (username) => {
         INNER JOIN department AS C ON A.id_department = C.id_department
         INNER JOIN divisi AS D ON A.id_divisi = D.id_divisi
         INNER JOIN groups AS E ON A.id_group = E.id_group
-        WHERE A.username = ?`;
-        const rows = await conn.query(query, [username]);
+        WHERE A.nik = ? OR A.username = ?`;
+        const rows = await conn.query(query, [username, username]);
         return rows[0];
     } catch (err) {
         throw new Error("Database error: " + err.message);
